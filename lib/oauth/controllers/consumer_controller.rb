@@ -26,7 +26,8 @@ module Oauth
             @request_token = @consumer.get_request_token(request_url)
             session[@request_token.token]=@request_token.secret
             if @request_token.callback_confirmed?
-              redirect_to @request_token.authorize_url
+              redirect_to @request_token.params[:xoauth_request_auth_url] # Hotfix for yahoo API
+              #redirect_to @request_token.authorize_url
             else
               redirect_to(@request_token.authorize_url + "&oauth_callback=#{callback_oauth_consumer_url(params[:id])}")
             end

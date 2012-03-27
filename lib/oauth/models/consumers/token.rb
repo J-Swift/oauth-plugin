@@ -27,26 +27,25 @@ module Oauth
           end
 
           def get_request_token(callback_url)
+            callback_url = "http://www.radreichley.com/" if RAILS_ENV=="development"
             consumer.get_request_token(:oauth_callback=>callback_url)
-          end
-
-          def find_or_create_from_request_token(user,token,secret,oauth_verifier)
-            request_token=OAuth::RequestToken.new consumer,token,secret
-            options={}
-            options[:oauth_verifier]=oauth_verifier if oauth_verifier
-            access_token=request_token.get_access_token options
-            find_or_create_from_access_token user, access_token
           end
           
           def find_or_create_from_access_token(user,access_token)
             secret = access_token.respond_to?(:secret) ? access_token.secret : nil
+            session_handle = access_token.params[:oauth_session_handle]
             if user
               token = self.find_or_initialize_by_user_id_and_token(user.id, access_token.token)
+              if(user.yahoo_guid.nil?)
+              	user.yahoo_guid = access_token.params[:xoauth_yahoo_guid]
+              	user.save!
+              end
             else
               token = self.find_or_initialize_by_token(access_token.token)
             end
             
             # set or update the secret
+            token.session_handle = session_handle if !session_handle.nil?
             token.secret = secret
             token.save! if token.new_record? or token.changed?
 
