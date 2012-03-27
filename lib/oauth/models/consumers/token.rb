@@ -25,9 +25,19 @@ module Oauth
             options = credentials[:options] || {}
             @consumer||=OAuth::Consumer.new credentials[:key],credentials[:secret],options
           end
-
+		  
+		  def find_or_create_from_request_token(user,token,secret,oauth_verifier)
+          	request_token=OAuth::RequestToken.new consumer,token,secret
+          
+          	options={}
+          	options[:oauth_verifier]=oauth_verifier if oauth_verifier
+          
+          	access_token=request_token.get_access_token options
+          	find_or_create_from_access_token user, access_token
+		  end
+		  
           def get_request_token(callback_url)
-            callback_url = "http://www.radreichley.com/" if RAILS_ENV=="development"
+            callback_url = CB_URL if RAILS_ENV=="development"
             consumer.get_request_token(:oauth_callback=>callback_url)
           end
           
