@@ -37,7 +37,7 @@ module Oauth
 		  end
 		  
           def get_request_token(callback_url)
-            callback_url = CB_URL if RAILS_ENV=="development"
+            callback_url = CB_URL if Rails.env.development?
             consumer.get_request_token(:oauth_callback=>callback_url)
           end
           
